@@ -1,0 +1,57 @@
+﻿@model IEnumerable<FlashFood.Web.Models.Entities.Category>
+@{
+    ViewData["Title"] = "Danh mục";
+}
+<section class="max-w-5xl mx-auto px-4 md:px-10 py-8">
+    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-semibold mb-4">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Về màn hình quản trị
+    </a>
+
+    <h1 class="text-3xl font-black mb-6">Quản lý danh mục</h1>
+
+    <form asp-area="Admin" asp-controller="Categories" asp-action="Create" method="post" class="bg-white border rounded-2xl p-4 grid md:grid-cols-2 gap-3 mb-5">
+        @Html.AntiForgeryToken()
+        <input name="name" placeholder="Tên danh mục" class="rounded-xl border px-3 py-2" required />
+        <input name="description" placeholder="Mô tả" class="rounded-xl border px-3 py-2" />
+        <textarea name="iconSvg" rows="3" placeholder="SVG icon (tùy chọn)" class="rounded-xl border px-3 py-2 md:col-span-2"></textarea>
+        <button class="rounded-xl bg-primary text-white">Thêm</button>
+    </form>
+
+    <div class="space-y-3">
+        @foreach (var category in Model)
+        {
+            <div class="bg-white border rounded-xl p-4 space-y-3">
+                <form asp-area="Admin" asp-controller="Categories" asp-action="Update" method="post" class="grid md:grid-cols-2 gap-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@category.Id" />
+                    <input name="name" value="@category.Name" class="rounded-xl border px-3 py-2" required />
+                    <input name="description" value="@category.Description" class="rounded-xl border px-3 py-2" />
+                    <textarea name="iconSvg" rows="3" class="rounded-xl border px-3 py-2 md:col-span-2" placeholder="SVG icon">@category.IconSvg</textarea>
+                    <button class="px-3 py-2 bg-slate-100 rounded-lg font-semibold">Cập nhật</button>
+                </form>
+
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-slate-500 flex items-center gap-2">
+                        @if (!string.IsNullOrWhiteSpace(category.IconSvg))
+                        {
+                            <span class="w-8 h-8 text-primary inline-flex items-center justify-center">@Html.Raw(category.IconSvg)</span>
+                            <span>Đã có icon SVG</span>
+                        }
+                        else
+                        {
+                            <span>Chưa có icon SVG</span>
+                        }
+                    </div>
+
+                    <form asp-area="Admin" asp-controller="Categories" asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@category.Id" />
+                        <button class="px-3 py-2 bg-red-100 text-red-700 rounded-lg">Xóa</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+

@@ -1,0 +1,25 @@
+﻿@model FlashFood.Web.Models.Entities.Product
+@{
+    ViewData["Title"] = "Sửa món";
+}
+<section class="max-w-3xl mx-auto px-4 md:px-10 py-8">
+    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-semibold mb-4">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Về màn hình quản trị
+    </a>
+
+    <h1 class="text-3xl font-black mb-6">Sửa sản phẩm</h1>
+    <form method="post" class="bg-white border rounded-2xl p-4 space-y-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input asp-for="Name" class="w-full rounded-xl border px-3 py-2" />
+        <input asp-for="BasePrice" class="w-full rounded-xl border px-3 py-2" />
+        <input asp-for="ImageUrl" class="w-full rounded-xl border px-3 py-2" />
+        <textarea asp-for="Description" class="w-full rounded-xl border px-3 py-2"></textarea>
+        <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="w-full rounded-xl border px-3 py-2"></select>
+        <label class="flex items-center gap-2"><input asp-for="IsAvailable" /> Còn bán</label>
+        <textarea name="variantsRaw" rows="4" class="w-full rounded-xl border px-3 py-2" placeholder="Biến thể (không bắt buộc), mỗi dòng theo dạng Ten|GiaThem">@ViewBag.VariantsRaw</textarea>
+        <button class="px-4 py-2 rounded-xl bg-primary text-white">Cập nhật</button>
+    </form>
+</section>
+

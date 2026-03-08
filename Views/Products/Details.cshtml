@@ -1,0 +1,79 @@
+﻿@model FlashFood.Web.Models.Entities.Product
+@{
+    ViewData["Title"] = "Chi tiết món";
+}
+<section class="max-w-7xl mx-auto px-4 md:px-10 py-6">
+    <div class="grid lg:grid-cols-2 gap-8">
+        <img src="@Model.ImageUrl" alt="@Model.Name" class="w-full h-[420px] object-cover rounded-3xl" />
+        <div>
+            <h1 class="text-3xl font-black">@Model.Name</h1>
+            <p class="text-primary font-bold text-xl mt-2">Từ @Model.BasePrice.ToString("N0")đ</p>
+            <p class="mt-4 text-slate-600">@Model.Description</p>
+            @if (!Model.IsAvailable)
+            {
+                <p class="mt-3 inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">Hết hàng</p>
+            }
+            else
+            {
+                <form asp-action="AddToCart" method="post" class="mt-6 space-y-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+
+                    @if (Model.Variants.Any())
+                    {
+                        <div class="border rounded-2xl p-4 space-y-3">
+                            <p class="font-semibold">Chọn biến thể cho món này (không bắt buộc)</p>
+                            <p class="text-sm text-slate-500">Mỗi lần bấm "Thêm vào giỏ" sẽ thêm 1 món. Muốn 2 món giống nhau, bấm 2 lần.</p>
+                            @foreach (var variant in Model.Variants)
+                            {
+                                <label class="flex items-center justify-between gap-3 border rounded-xl px-3 py-2 cursor-pointer hover:bg-slate-50">
+                                    <div>
+                                        <p class="font-medium">@variant.Name</p>
+                                        <p class="text-sm text-slate-500">+@variant.AdditionalPrice.ToString("N0")đ</p>
+                                    </div>
+                                    <input type="checkbox" name="selectedVariantIds" value="@variant.Id" class="rounded border-slate-300 text-primary focus:ring-primary" />
+                                </label>
+                            }
+                        </div>
+                    }
+
+                    <button class="px-6 py-3 bg-primary text-white rounded-xl font-semibold">Thêm vào giỏ</button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <div class="mt-12 grid lg:grid-cols-2 gap-8">
+        <div>
+            <h2 class="text-2xl font-bold mb-4">Đánh giá</h2>
+            <div class="space-y-3">
+                @foreach (var review in Model.Reviews.OrderByDescending(x => x.CreatedAt))
+                {
+                    <div class="bg-white border rounded-xl p-4">
+                        <div class="flex justify-between">
+                            <strong>@review.ReviewerName</strong>
+                            <span class="text-yellow-500">@(new string('★', review.Rating))</span>
+                        </div>
+                        <p class="text-slate-600 mt-2">@review.Comment</p>
+                    </div>
+                }
+            </div>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold mb-4">Viết đánh giá</h2>
+            <form asp-action="AddReview" method="post" class="bg-white border rounded-2xl p-4 space-y-3">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="productId" value="@Model.Id" />
+                <select name="rating" class="w-full rounded-xl border px-3 py-2">
+                    <option value="5">5 sao</option>
+                    <option value="4">4 sao</option>
+                    <option value="3">3 sao</option>
+                    <option value="2">2 sao</option>
+                    <option value="1">1 sao</option>
+                </select>
+                <textarea name="comment" rows="4" placeholder="Nhập nhận xét" class="w-full rounded-xl border px-3 py-2" required></textarea>
+                <button class="px-5 py-2 bg-primary text-white rounded-xl">Gửi đánh giá</button>
+            </form>
+        </div>
+    </div>
+</section>

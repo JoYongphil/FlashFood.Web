@@ -1,0 +1,74 @@
+﻿@model FlashFood.Web.Models.ViewModels.DashboardViewModel
+@using FlashFood.Web.Models.Enums
+@using FlashFood.Web.Models.Entities
+@using FlashFood.Web.Models.ViewModels
+@{
+    ViewData["Title"] = "Bảng điều khiển";
+    var filter = ViewBag.Filter as DashboardFilterViewModel ?? new();
+    var nonCompletedOrders = ViewBag.NonCompletedOrders as List<Order> ?? new();
+
+    string GetStatusLabel(OrderStatus status) => status switch
+    {
+        OrderStatus.PendingConfirmation => "Chờ xác nhận",
+        OrderStatus.Preparing => "Đang làm",
+        OrderStatus.Delivering => "Đang giao",
+        OrderStatus.Delivered => "Đã giao",
+        OrderStatus.Completed => "Hoàn thành",
+        OrderStatus.Cancelled => "Hủy đơn",
+        _ => status.ToString()
+    };
+}
+<section class="max-w-7xl mx-auto px-4 md:px-10 py-8">
+    <h1 class="text-3xl font-black mb-6">Dashboard quản trị</h1>
+    <form method="get" class="bg-white border rounded-2xl p-4 grid md:grid-cols-4 gap-3 mb-6">
+        <select name="Period" class="rounded-xl border px-3 py-2">
+            <option value="day" selected="@(filter.Period=="day")">Theo ngày</option>
+            <option value="month" selected="@(filter.Period=="month")">Theo tháng</option>
+            <option value="year" selected="@(filter.Period=="year")">Theo năm</option>
+        </select>
+        <input type="date" name="FromDate" value="@filter.FromDate?.ToString("yyyy-MM-dd")" class="rounded-xl border px-3 py-2" />
+        <input type="date" name="ToDate" value="@filter.ToDate?.ToString("yyyy-MM-dd")" class="rounded-xl border px-3 py-2" />
+        <button class="rounded-xl bg-primary text-white">Lọc</button>
+    </form>
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white border rounded-2xl p-4"><p class="text-slate-500">Tổng doanh thu</p><h3 class="text-2xl font-black">@Model.TotalRevenue.ToString("N0")đ</h3></div>
+        <div class="bg-white border rounded-2xl p-4"><p class="text-slate-500">Tổng đơn hàng</p><h3 class="text-2xl font-black">@Model.TotalOrders</h3></div>
+        <div class="bg-white border rounded-2xl p-4"><p class="text-slate-500">Món bán chạy nhất</p><h3 class="text-lg font-black">@Model.BestSellingProduct (@Model.BestSellingQuantity)</h3></div>
+    </div>
+    <div class="flex gap-3 mb-8">
+        <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="px-4 py-2 rounded-xl bg-slate-100">Quản lý món</a>
+        <a asp-area="Admin" asp-controller="Categories" asp-action="Index" class="px-4 py-2 rounded-xl bg-slate-100">Quản lý danh mục</a>
+        <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="px-4 py-2 rounded-xl bg-slate-100">Quản lý đơn</a>
+    </div>
+
+    <div>
+        <h2 class="text-2xl font-bold mb-3">Đơn hàng chưa hoàn thành</h2>
+        <p class="text-sm text-slate-500 mb-4">Sắp xếp từ thời gian cũ nhất đến mới nhất.</p>
+
+        <div class="space-y-3">
+            @if (!nonCompletedOrders.Any())
+            {
+                <div class="bg-white border rounded-xl p-4 text-slate-500">Không có đơn hàng chưa hoàn thành.</div>
+            }
+            else
+            {
+                @foreach (var order in nonCompletedOrders)
+                {
+                    <a asp-area="Admin" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="block bg-white border rounded-xl p-3 hover:border-primary">
+                        <div class="flex justify-between gap-4">
+                            <div>
+                                <strong>@order.OrderCode</strong>
+                                <p class="text-sm text-slate-500">@order.CustomerName - @order.Phone</p>
+                                <p class="text-xs text-slate-400">Đặt lúc: @order.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold">@order.TotalAmount.ToString("N0")đ</p>
+                                <p class="text-sm">@GetStatusLabel(order.Status)</p>
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+        </div>
+    </div>
+</section>

@@ -1,0 +1,169 @@
+﻿@page
+@model LoginModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Flash Food</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#f20d0d",
+                        backgroundLight: "#f8f5f5",
+                        backgroundDark: "#221010"
+                    },
+                    fontFamily: {
+                        display: ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Plus Jakarta Sans", sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-backgroundLight text-slate-900 min-h-screen flex items-center justify-center font-display">
+    <div class="flex min-h-screen w-full flex-col lg:flex-row overflow-hidden">
+        <div class="hidden lg:flex lg:w-1/2 relative bg-primary items-center justify-center p-12">
+            <div class="absolute inset-0 opacity-40 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1PyoEGuw_-PoYA_J8EJMHA4YSvSBpvTSZqyHp8xYmUXFsQrG4jah7-T6Z-J9LFb2EOOB12BUfjKBSo7YXf493rLUm2MfYnUMrsEOiWRdPrfiLYHmNl56u1yvuoz1zvrt_PVl0wdWM2jQhAQ0z3p1Ple7oOQpURlO8ObC6kK-Sv7zNu9i1sqo9ce5oIqBlY6fCZsNQqmy7Eb7oT7QngeHku5__7PovuJh4zcTmYV6-nZY62vmgb5k0Y8Zntq6esAFJYdk_NoI_01d6')"></div>
+            <div class="relative z-10 text-center">
+                <div class="mb-8 flex justify-center">
+                    <div class="bg-white p-4 rounded-full shadow-2xl">
+                        <span class="material-symbols-outlined text-primary text-6xl">restaurant</span>
+                    </div>
+                </div>
+                <h1 class="text-white text-5xl font-black mb-4">Flash Food</h1>
+                <p class="text-white/90 text-xl font-medium">Nhanh hơn chớp, ngon hơn mong đợi.</p>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-24 bg-backgroundLight">
+            <div class="w-full max-w-md">
+                <div class="flex lg:hidden items-center gap-3 mb-10 justify-center">
+                    <span class="material-symbols-outlined text-primary text-4xl">restaurant</span>
+                    <h2 class="text-slate-900 text-3xl font-black">Flash Food</h2>
+                </div>
+
+                <div class="mb-10 text-center lg:text-left">
+                    <h3 class="text-slate-900 text-3xl font-bold mb-2">Đăng nhập</h3>
+                    <p class="text-slate-500">Chào mừng bạn trở lại với Flash Food!</p>
+                </div>
+
+                <form id="account" method="post" class="space-y-5">
+                    <div asp-validation-summary="ModelOnly" class="rounded-xl bg-red-100 text-red-700 px-4 py-3 text-sm"></div>
+
+                    <div class="flex flex-col gap-2">
+                        <label asp-for="Input.Email" class="text-slate-700 text-sm font-semibold">Email</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">mail</span>
+                            <input asp-for="Input.Email" autocomplete="username" aria-required="true" placeholder="Nhập email của bạn" class="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-200 bg-white text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" />
+                        </div>
+                        <span asp-validation-for="Input.Email" class="text-red-600 text-sm"></span>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label asp-for="Input.Password" class="text-slate-700 text-sm font-semibold">Mật khẩu</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">lock</span>
+                            <input id="login-password" asp-for="Input.Password" type="password" autocomplete="current-password" aria-required="true" placeholder="Nhập mật khẩu" class="w-full pl-12 pr-12 py-4 rounded-xl border border-slate-200 bg-white text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none" />
+                            <button id="toggle-password" type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" aria-label="Hiện mật khẩu">
+                                <span id="toggle-password-icon" class="material-symbols-outlined">visibility</span>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.Password" class="text-red-600 text-sm"></span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label asp-for="Input.RememberMe" class="text-sm text-slate-600 inline-flex items-center gap-2">
+                            <input asp-for="Input.RememberMe" class="rounded border-slate-300 text-primary focus:ring-primary" />
+                            @Html.DisplayNameFor(m => m.Input.RememberMe)
+                        </label>
+                        <a id="forgot-password" asp-page="./ForgotPassword" class="text-primary text-sm font-semibold hover:underline">Quên mật khẩu?</a>
+                    </div>
+
+                    <button id="login-submit" type="submit" class="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98]">
+                        Đăng nhập ngay
+                    </button>
+                </form>
+
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="bg-backgroundLight px-4 text-slate-500 font-medium">Hoặc đăng nhập bằng</span>
+                    </div>
+                </div>
+
+                <div>
+                    @if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                    {
+                        <p class="text-sm text-slate-500 text-center">Chưa cấu hình dịch vụ đăng nhập ngoài.</p>
+                    }
+                    else
+                    {
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="grid grid-cols-2 gap-4">
+                            @foreach (var provider in Model.ExternalLogins!)
+                            {
+                                <button type="submit" class="flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all" name="provider" value="@provider.Name" title="Đăng nhập bằng @provider.DisplayName">
+                                    <span class="material-symbols-outlined text-primary">login</span>
+                                    <span class="text-slate-700 font-bold">@provider.DisplayName</span>
+                                </button>
+                            }
+                        </form>
+                    }
+                </div>
+
+                <div class="mt-10 text-center">
+                    <p class="text-slate-600">
+                        Bạn chưa có tài khoản?
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-primary font-bold hover:underline">Đăng ký ngay</a>
+                    </p>
+                    <p class="mt-2">
+                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="text-sm text-slate-500 hover:text-primary">Gửi lại email xác nhận</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            const passwordInput = document.getElementById('login-password');
+            const toggleButton = document.getElementById('toggle-password');
+            const toggleIcon = document.getElementById('toggle-password-icon');
+            if (!passwordInput || !toggleButton || !toggleIcon) return;
+
+            toggleButton.addEventListener('click', function () {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                toggleIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+                toggleButton.setAttribute('aria-label', isPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+            });
+        })();
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>
+
+

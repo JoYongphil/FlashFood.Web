@@ -1,0 +1,152 @@
+﻿@page
+@model RegisterModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Đăng ký";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Flash Food</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#f20d0d",
+                        backgroundLight: "#f8f5f5",
+                        backgroundDark: "#221010"
+                    },
+                    fontFamily: {
+                        display: ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: "Plus Jakarta Sans", sans-serif; }
+    </style>
+</head>
+<body class="font-display bg-backgroundLight text-slate-900 min-h-screen">
+<div class="flex min-h-screen">
+    <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div class="absolute inset-0 bg-primary/40 z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-backgroundDark/80 to-transparent z-20"></div>
+        <img class="absolute inset-0 w-full h-full object-cover" alt="Burger và khoai tây" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIT6bDkWpZocEVuhkuC2ukYiClBeOYwFnUdTrkCwSQC2YbKWoO50nEApkR5yHmd8x1Aqw903PM_aPa0pWLBwNlXMwRtFJEZZFUEtkMTo91VW7tcQcIscWPztbqNQLw9o629Kl817O4Fi5yiB_3jC_vNcQn-GebTzYEPSuDiuKLV_oiCV8B6uKFw1eseOdFrO5acNAb3MjHKqgM9InrnDGNZCYB3touAuyXSc1m12e-V6DHjCNYFp8NMwA8lc3Vo8591lWubqY8aTAO" />
+        <div class="relative z-30 flex flex-col justify-end p-20 text-white">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="material-symbols-outlined text-4xl">fastfood</span>
+                <h2 class="text-3xl font-extrabold tracking-tight">Flash Food</h2>
+            </div>
+            <h1 class="text-5xl font-black leading-tight mb-4">Giao hàng cực nhanh,<br />Thưởng thức cực đã.</h1>
+            <p class="text-lg opacity-90 max-w-md">Tham gia cộng đồng Flash Food để nhận ngay các ưu đãi độc quyền.</p>
+        </div>
+    </div>
+
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-24 bg-white">
+        <div class="max-w-md w-full mx-auto">
+            <div class="mb-10">
+                <div class="lg:hidden flex items-center gap-2 mb-8 text-primary">
+                    <span class="material-symbols-outlined text-3xl">fastfood</span>
+                    <h2 class="text-xl font-bold">Flash Food</h2>
+                </div>
+                <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Đăng ký</h1>
+                <p class="text-slate-600">Tạo tài khoản mới để bắt đầu đặt hàng.</p>
+            </div>
+
+            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="space-y-5">
+                <div asp-validation-summary="ModelOnly" class="rounded-xl bg-red-100 text-red-700 px-4 py-3 text-sm"></div>
+
+                <div>
+                    <label asp-for="Input.Email" class="block text-sm font-semibold text-slate-700 mb-2">Email</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-xl">mail</span>
+                        </div>
+                        <input asp-for="Input.Email" autocomplete="username" aria-required="true" placeholder="name@example.com" class="block w-full pl-11 pr-4 py-3.5 bg-backgroundLight border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 placeholder-slate-400 text-sm transition-all" />
+                    </div>
+                    <span asp-validation-for="Input.Email" class="text-red-600 text-sm"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Password" class="block text-sm font-semibold text-slate-700 mb-2">Mật khẩu</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-xl">lock</span>
+                        </div>
+                        <input asp-for="Input.Password" autocomplete="new-password" aria-required="true" placeholder="••••••••" class="block w-full pl-11 pr-4 py-3.5 bg-backgroundLight border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 placeholder-slate-400 text-sm transition-all" />
+                    </div>
+                    <span asp-validation-for="Input.Password" class="text-red-600 text-sm"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.ConfirmPassword" class="block text-sm font-semibold text-slate-700 mb-2">Xác nhận mật khẩu</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-xl">key</span>
+                        </div>
+                        <input asp-for="Input.ConfirmPassword" autocomplete="new-password" aria-required="true" placeholder="••••••••" class="block w-full pl-11 pr-4 py-3.5 bg-backgroundLight border-transparent focus:border-primary focus:ring-0 rounded-xl text-slate-900 placeholder-slate-400 text-sm transition-all" />
+                    </div>
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-red-600 text-sm"></span>
+                </div>
+
+                <div class="pt-2">
+                    <button id="registerSubmit" type="submit" class="w-full flex justify-center py-4 px-4 rounded-xl text-base font-bold text-white bg-primary hover:bg-primary/90 transition-all">
+                        Đăng ký
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-8">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-white text-slate-500">Hoặc đăng ký bằng</span>
+                    </div>
+                </div>
+
+                @if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                    <p class="mt-6 text-sm text-slate-500 text-center">Chưa cấu hình đăng nhập ngoài.</p>
+                }
+                else
+                {
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="mt-6 grid grid-cols-2 gap-4">
+                        @foreach (var provider in Model.ExternalLogins!)
+                        {
+                            <button type="submit" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all font-medium text-slate-700" name="provider" value="@provider.Name" title="Đăng nhập bằng @provider.DisplayName">
+                                <span class="material-symbols-outlined text-primary">login</span>
+                                <span>@provider.DisplayName</span>
+                            </button>
+                        }
+                    </form>
+                }
+            </div>
+
+            <div class="mt-10 text-center">
+                <p class="text-sm text-slate-600">
+                    Bạn đã có tài khoản?
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="font-bold text-primary hover:underline">Đăng nhập ngay</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<partial name="_ValidationScriptsPartial" />
+</body>
+</html>

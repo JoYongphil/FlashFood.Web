@@ -1,0 +1,49 @@
+﻿@model List<FlashFood.Web.Models.ViewModels.CartItemViewModel>
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var subtotal = (decimal)(ViewBag.Subtotal ?? 0m);
+}
+<section class="max-w-7xl mx-auto px-4 md:px-10 py-8">
+    <h1 class="text-3xl font-black mb-6">Giỏ hàng của bạn</h1>
+    @if (!Model.Any())
+    {
+        <p>Giỏ hàng đang trống.</p>
+    }
+    else
+    {
+        <div class="grid lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-4">
+                @foreach (var item in Model)
+                {
+                    <div class="bg-white border rounded-2xl p-4 flex gap-4 items-center">
+                        <img src="@item.ImageUrl" class="w-24 h-24 rounded-xl object-cover" />
+                        <div class="flex-1">
+                            <h3 class="font-bold">@item.ProductName</h3>
+                            @if (!string.IsNullOrWhiteSpace(item.VariantName))
+                            {
+                                <p class="text-sm text-slate-500">Biến thể: @item.VariantName</p>
+                            }
+                            <p class="text-primary font-semibold">@item.UnitPrice.ToString("N0")đ</p>
+                        </div>
+                        <form asp-action="UpdateQuantity" method="post" class="flex items-center gap-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="key" value="@item.Key" />
+                            <input type="number" name="quantity" min="0" value="@item.Quantity" class="w-20 rounded-lg border px-2 py-1" />
+                            <button class="px-3 py-1 rounded-lg bg-slate-100">Cập nhật</button>
+                        </form>
+                        <form asp-action="Remove" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="key" value="@item.Key" />
+                            <button class="px-3 py-1 rounded-lg bg-red-100 text-red-700">Xóa</button>
+                        </form>
+                    </div>
+                }
+            </div>
+            <div class="bg-white border rounded-2xl p-4 h-fit">
+                <h3 class="font-bold text-lg">Tóm tắt đơn</h3>
+                <div class="flex justify-between mt-4"><span>Tạm tính</span><strong>@subtotal.ToString("N0")đ</strong></div>
+                <a asp-controller="Checkout" asp-action="Index" class="block mt-6 text-center py-3 bg-primary text-white rounded-xl font-semibold">Thanh toán</a>
+            </div>
+        </div>
+    }
+</section>

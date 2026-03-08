@@ -1,0 +1,84 @@
+﻿@using FlashFood.Web.Models.Entities
+@model FlashFood.Web.Models.ViewModels.UserProfileViewModel
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    var vouchers = ViewBag.ActiveVouchers as List<Voucher> ?? new();
+}
+<section class="max-w-5xl mx-auto px-4 md:px-10 py-8">
+    <h1 class="text-3xl font-black mb-6">Thông tin cá nhân</h1>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+        <form method="post" class="lg:col-span-2 bg-white border rounded-2xl p-5 space-y-4">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="text-red-600"></div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="FullName" class="block text-sm font-semibold mb-1">Họ tên</label>
+                    <input asp-for="FullName" class="w-full rounded-xl border px-3 py-2" />
+                    <span asp-validation-for="FullName" class="text-red-600 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="Phone" class="block text-sm font-semibold mb-1">Số điện thoại</label>
+                    <input asp-for="Phone" class="w-full rounded-xl border px-3 py-2" />
+                    <span asp-validation-for="Phone" class="text-red-600 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="Email" class="block text-sm font-semibold mb-1">Email</label>
+                    <input asp-for="Email" readonly class="w-full rounded-xl border px-3 py-2 bg-slate-100 text-slate-600" />
+                </div>
+                <div>
+                    <label asp-for="Province" class="block text-sm font-semibold mb-1">Tỉnh/Thành</label>
+                    <input asp-for="Province" class="w-full rounded-xl border px-3 py-2" />
+                    <span asp-validation-for="Province" class="text-red-600 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="District" class="block text-sm font-semibold mb-1">Quận/Huyện</label>
+                    <input asp-for="District" class="w-full rounded-xl border px-3 py-2" />
+                    <span asp-validation-for="District" class="text-red-600 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="Ward" class="block text-sm font-semibold mb-1">Phường/Xã</label>
+                    <input asp-for="Ward" class="w-full rounded-xl border px-3 py-2" />
+                    <span asp-validation-for="Ward" class="text-red-600 text-sm"></span>
+                </div>
+            </div>
+
+            <div class="rounded-xl bg-slate-50 border p-3 text-sm text-slate-600">
+                <p class="font-semibold text-slate-800 mb-1">Địa chỉ chi tiết gần nhất</p>
+                <p>@(string.IsNullOrWhiteSpace(Model.LastAddressDetail) ? "Chưa có" : Model.LastAddressDetail)</p>
+                <p class="mt-1">Khi checkout, hệ thống sẽ tự điền thông tin này để bạn không cần nhập lại.</p>
+            </div>
+
+            <button class="px-5 py-3 rounded-xl bg-primary text-white font-semibold">Lưu thông tin</button>
+        </form>
+
+        <div class="bg-white border rounded-2xl p-5 h-fit">
+            <h2 class="text-xl font-bold mb-3">Voucher đang có</h2>
+            @if (!vouchers.Any())
+            {
+                <p class="text-slate-500">Hiện chưa có voucher khả dụng.</p>
+            }
+            else
+            {
+                <div class="space-y-3">
+                    @foreach (var voucher in vouchers)
+                    {
+                        <div class="rounded-xl border p-3 bg-slate-50">
+                            <p class="font-bold text-primary">@voucher.Code</p>
+                            <p class="text-sm text-slate-600">
+                                @(voucher.Type == FlashFood.Web.Models.Enums.VoucherType.Percentage
+                                    ? $"Giảm {voucher.Value:0}%"
+                                    : "Freeship toàn bộ")
+                            </p>
+                            <p class="text-xs text-slate-500">Hết hạn: @voucher.ExpiresAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,28 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using FlashFood.Web.Models.Entities
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    var isAdmin = User.IsInRole("Admin");
+
+    <div class="flex items-center gap-3">
+        @if (isAdmin)
+        {
+            <span class="hidden md:inline text-sm">@User.Identity?.Name</span>
+        }
+        else
+        {
+            <a asp-controller="Profile" asp-action="Index" class="hidden md:inline text-sm hover:text-primary transition-colors">@User.Identity?.Name</a>
+        }
+
+        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Products", new { area = "" })" method="post">
+            <button type="submit" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm">Đăng xuất</button>
+        </form>
+    </div>
+}
+else
+{
+    <a asp-area="Identity" asp-page="/Account/Login" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm">Đăng nhập</a>
+}
