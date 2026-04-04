@@ -5,6 +5,7 @@
 
     string GetStatusLabel(OrderStatus status) => status switch
     {
+        OrderStatus.PendingPayment => "Chờ thanh toán",
         OrderStatus.PendingConfirmation => "Chờ xác nhận",
         OrderStatus.Preparing => "Đang làm",
         OrderStatus.Delivering => "Đang giao",
@@ -49,6 +50,7 @@
         <div class="bg-white border rounded-2xl p-4 h-fit space-y-3">
             <h3 class="font-bold text-lg">Tóm tắt đơn</h3>
             <div class="flex justify-between"><span>Trạng thái</span><strong>@GetStatusLabel(Model.Status)</strong></div>
+            <div class="flex justify-between"><span>Thanh toán</span><strong>@(Model.IsPaid ? "Đã thanh toán" : "Chưa thanh toán")</strong></div>
             <div class="flex justify-between"><span>Tạm tính</span><strong>@Model.Subtotal.ToString("N0")đ</strong></div>
             <div class="flex justify-between"><span>Giảm giá</span><strong>-@Model.DiscountAmount.ToString("N0")đ</strong></div>
             <div class="flex justify-between"><span>Phí ship</span><strong>@Model.ShippingFee.ToString("N0")đ</strong></div>
@@ -59,6 +61,10 @@
                 <p><span class="font-semibold text-slate-800">Địa chỉ:</span> @Model.AddressDetail, @Model.Ward, @Model.District, @Model.Province</p>
             </div>
 
+            @if (!Model.IsPaid && Model.Status != OrderStatus.Cancelled && Model.Status != OrderStatus.Completed)
+            {
+                <a asp-controller="Checkout" asp-action="ContinuePayment" asp-route-id="@Model.Id" class="block mt-3 text-center py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold">Thanh toán lại</a>
+            }
             <a asp-action="Invoice" asp-route-id="@Model.Id" class="block mt-3 text-center py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-semibold">Tải PDF hóa đơn</a>
         </div>
     </div>

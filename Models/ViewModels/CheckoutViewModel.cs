@@ -30,7 +30,6 @@ public class CheckoutViewModel
     public string? Note { get; set; }
     public string? PercentVoucherCode { get; set; }
     public string? FreeShipVoucherCode { get; set; }
-    public bool SimulatePaid { get; set; }
     public decimal? ManualDistanceKm { get; set; }
 }
 

@@ -47,7 +47,7 @@ public class OrdersController(ApplicationDbContext dbContext) : Controller
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var order = await dbContext.Orders.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
-        if (order is not null && order.Status == OrderStatus.PendingConfirmation)
+        if (order is not null && (order.Status == OrderStatus.PendingConfirmation || order.Status == OrderStatus.PendingPayment))
         {
             order.Status = OrderStatus.Cancelled;
             await dbContext.SaveChangesAsync();

@@ -1,5 +1,6 @@
 ﻿using FlashFood.Web.Data;
 using FlashFood.Web.Models.Entities;
+using FlashFood.Web.Models.Options;
 using FlashFood.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -46,10 +47,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
+builder.Services.Configure<VnPayOptions>(builder.Configuration.GetSection(VnPayOptions.SectionName));
 
 builder.Services.AddScoped<ICartService, SessionCartService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<IGoogleDistanceService, GoogleDistanceService>();
+builder.Services.AddScoped<IVnPayService, VnPayService>();
 
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 

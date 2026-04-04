@@ -79,15 +79,14 @@
 
         <div class="grid md:grid-cols-2 gap-4">
             <input asp-for="ManualDistanceKm" type="number" step="0.1" placeholder="Khoảng cách dự phòng (km)" class="rounded-xl border px-3 py-2" />
-            <label class="flex items-center gap-2">
-                <input asp-for="SimulatePaid" />
-                <span>Nhấn để mô phỏng đã thanh toán</span>
-            </label>
+            <div class="rounded-xl border px-4 py-3 bg-slate-50 text-sm text-slate-600">
+                Đơn hàng sẽ được tạo trước, sau đó hệ thống chuyển bạn sang VNPAY Sandbox để hoàn tất thanh toán.
+            </div>
         </div>
 
-        <button class="px-6 py-3 bg-primary text-white rounded-xl font-semibold">Xác nhận đặt hàng</button>
+        <button class="px-6 py-3 bg-primary text-white rounded-xl font-semibold">Tiếp tục đến VNPAY</button>
     </form>
-    <p class="text-sm text-slate-500 mt-4">Google Maps API key cấu hình tại appsettings.json > GoogleMaps:ApiKey. Nếu chưa có key, hệ thống dùng khoảng cách dự phòng bạn nhập.</p>
+    <p class="text-sm text-slate-500 mt-4">Google Maps API key cấu hình tại appsettings.json > GoogleMaps:ApiKey. Nếu chưa có key, hệ thống dùng khoảng cách dự phòng bạn nhập. Cấu hình VNPAY nằm tại appsettings.json > VnPay.</p>
 </section>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

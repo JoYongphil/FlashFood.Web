@@ -1,7 +1,9 @@
-﻿using FlashFood.Web.Data;
+using System.Text.Json;
+using FlashFood.Web.Data;
 using FlashFood.Web.Models.Entities;
 using FlashFood.Web.Models.Enums;
 using FlashFood.Web.Models.ViewModels;
+using FlashFood.Web.Models.VnPay;
 using FlashFood.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +16,8 @@ public class CheckoutController(
     ICartService cartService,
     IGoogleDistanceService distanceService,
     IVoucherService voucherService,
-    UserManager<AppUser> userManager) : Controller
+    UserManager<AppUser> userManager,
+    IVnPayService vnPayService) : Controller
 {
     private const string GuestOrderSessionKey = "FLASHFOOD_GUEST_ORDER_IDS";
 
@@ -23,7 +26,7 @@ public class CheckoutController(
         var cart = cartService.GetItems();
         if (!cart.Any())
         {
-            TempData["Error"] = "Giỏ hàng trống.";
+            TempData["Error"] = "Gio hang trong.";
             return RedirectToAction("Index", "Products");
         }
 
@@ -40,8 +43,13 @@ public class CheckoutController(
         var cart = cartService.GetItems();
         if (!cart.Any())
         {
-            TempData["Error"] = "Giỏ hàng trống.";
+            TempData["Error"] = "Gio hang trong.";
             return RedirectToAction("Index", "Products");
+        }
+
+        if (!vnPayService.IsConfigured)
+        {
+            ModelState.AddModelError(string.Empty, "VNPAY chua duoc cau hinh. Hay cap nhat VnPay trong appsettings.json truoc khi thanh toan.");
         }
 
         if (!ModelState.IsValid)
@@ -55,14 +63,14 @@ public class CheckoutController(
 
         if (!distanceKm.HasValue)
         {
-            ModelState.AddModelError(string.Empty, "Không tính được khoảng cách. Hãy nhập khoảng cách thủ công.");
+            ModelState.AddModelError(string.Empty, "Khong tinh duoc khoang cach. Hay nhap khoang cach thu cong.");
             await LoadVoucherViewDataAsync();
             return View(model);
         }
 
         if (distanceKm.Value > 10)
         {
-            ModelState.AddModelError(string.Empty, "Khoảng cách trên 10km, hệ thống không hỗ trợ giao hàng.");
+            ModelState.AddModelError(string.Empty, "Khoang cach tren 10km, he thong khong ho tro giao hang.");
             await LoadVoucherViewDataAsync();
             return View(model);
         }
@@ -88,7 +96,7 @@ public class CheckoutController(
         }
         else if (!string.IsNullOrWhiteSpace(model.PercentVoucherCode) || !string.IsNullOrWhiteSpace(model.FreeShipVoucherCode))
         {
-            ModelState.AddModelError(string.Empty, "Khách chưa đăng nhập không được áp dụng voucher.");
+            ModelState.AddModelError(string.Empty, "Khach chua dang nhap khong duoc ap dung voucher.");
             await LoadVoucherViewDataAsync();
             return View(model);
         }
@@ -122,8 +130,8 @@ public class CheckoutController(
             DiscountAmount = Math.Round(discountAmount, 0),
             ShippingFee = shippingFee,
             TotalAmount = Math.Round(total, 0),
-            Status = OrderStatus.PendingConfirmation,
-            IsPaid = model.SimulatePaid,
+            Status = OrderStatus.PendingPayment,
+            IsPaid = false,
             PercentVoucherCode = percentVoucher?.Code,
             FreeShipVoucherCode = freeShipVoucher?.Code,
             Items = cart.Select(x => new OrderItem
@@ -158,18 +166,124 @@ public class CheckoutController(
             SaveGuestOrderToSession(order.Id);
         }
 
-        return RedirectToAction(nameof(Success), new { id = order.Id });
+        return Redirect(BuildPaymentUrl(order));
     }
 
     public async Task<IActionResult> Success(int id)
     {
-        var order = await dbContext.Orders.FirstOrDefaultAsync(x => x.Id == id);
+        var order = await GetAccessibleOrderAsync(id);
         if (order is null)
         {
             return NotFound();
         }
 
         return View(order);
+    }
+
+    public async Task<IActionResult> ContinuePayment(int id)
+    {
+        var order = await GetAccessibleOrderAsync(id);
+        if (order is null)
+        {
+            return NotFound();
+        }
+
+        if (order.IsPaid)
+        {
+            return RedirectToAction(nameof(Success), new { id });
+        }
+
+        if (order.Status == OrderStatus.Cancelled || order.Status == OrderStatus.Completed)
+        {
+            TempData["Error"] = "Don hang nay khong con kha dung de thanh toan lai.";
+            return RedirectToOrderDetails(order.Id);
+        }
+
+        if (!vnPayService.IsConfigured)
+        {
+            TempData["Error"] = "VNPAY chua duoc cau hinh. Hay cap nhat VnPay trong appsettings.json.";
+            return RedirectToOrderDetails(order.Id);
+        }
+
+        order.Status = OrderStatus.PendingPayment;
+        await dbContext.SaveChangesAsync();
+
+        return Redirect(BuildPaymentUrl(order));
+    }
+
+    [HttpGet("/payment/vnpay-return")]
+    public async Task<IActionResult> VnPayReturn()
+    {
+        if (!vnPayService.IsConfigured)
+        {
+            TempData["Error"] = "VNPAY chua duoc cau hinh.";
+            return RedirectToAction("Index", "Products");
+        }
+
+        var result = vnPayService.ParseResponse(Request.Query);
+        if (!result.IsValidSignature || !result.OrderId.HasValue)
+        {
+            TempData["Error"] = "Khong xac thuc duoc phan hoi tu VNPAY.";
+            return RedirectToAction("Index", "Products");
+        }
+
+        var order = await GetAccessibleOrderAsync(result.OrderId.Value);
+        if (order is null)
+        {
+            return NotFound();
+        }
+
+        var isAmountValid = IsOrderAmountValid(order, result.Amount);
+        if (result.IsValidSignature && isAmountValid)
+        {
+            await ApplyPaymentResultAsync(order, result.IsSuccess);
+        }
+
+        TempData[result.IsSuccess && isAmountValid ? "Success" : "Error"] =
+            result.IsSuccess && isAmountValid
+                ? "Thanh toan VNPAY thanh cong."
+                : "Thanh toan chua thanh cong. Ban co the thu thanh toan lai.";
+
+        return RedirectToAction(nameof(Success), new { id = order.Id });
+    }
+
+    [HttpGet("/payment/vnpay-ipn")]
+    public async Task<IActionResult> VnPayIpn()
+    {
+        if (!vnPayService.IsConfigured)
+        {
+            return Json(new { RspCode = "99", Message = "Configuration invalid" });
+        }
+
+        var result = vnPayService.ParseResponse(Request.Query);
+        if (!result.IsValidSignature)
+        {
+            return Json(new { RspCode = "97", Message = "Invalid signature" });
+        }
+
+        if (!result.OrderId.HasValue)
+        {
+            return Json(new { RspCode = "01", Message = "Order not found" });
+        }
+
+        var order = await dbContext.Orders.FirstOrDefaultAsync(x => x.Id == result.OrderId.Value);
+        if (order is null)
+        {
+            return Json(new { RspCode = "01", Message = "Order not found" });
+        }
+
+        if (!IsOrderAmountValid(order, result.Amount))
+        {
+            return Json(new { RspCode = "04", Message = "Invalid amount" });
+        }
+
+        if (order.IsPaid)
+        {
+            return Json(new { RspCode = "02", Message = "Order already confirmed" });
+        }
+
+        await ApplyPaymentResultAsync(order, result.IsSuccess);
+        return Json(new { RspCode = "00", Message = "Confirm success" });
     }
 
     public async Task<IActionResult> GuestOrders()
@@ -200,7 +314,7 @@ public class CheckoutController(
         var trackedIds = GetGuestOrderIdsFromSession();
         if (!trackedIds.Contains(id))
         {
-            TempData["Error"] = "Không tìm thấy đơn trong phiên làm việc hiện tại.";
+            TempData["Error"] = "Khong tim thay don trong phien lam viec hien tai.";
             return RedirectToAction(nameof(GuestOrders));
         }
 
@@ -211,11 +325,84 @@ public class CheckoutController(
 
         if (order is null)
         {
-            TempData["Error"] = "Không tìm thấy đơn hàng.";
+            TempData["Error"] = "Khong tim thay don hang.";
             return RedirectToAction(nameof(GuestOrders));
         }
 
         return View(order);
+    }
+
+    private string BuildPaymentUrl(Order order)
+    {
+        return vnPayService.CreatePaymentUrl(new VnPayPaymentRequest
+        {
+            OrderId = order.Id,
+            OrderCode = order.OrderCode,
+            Amount = order.TotalAmount,
+            OrderInfo = $"Thanh toan don hang {order.OrderCode}",
+            IpAddress = GetClientIpAddress()
+        });
+    }
+
+    private string GetClientIpAddress()
+    {
+        return HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "127.0.0.1";
+    }
+
+    private async Task ApplyPaymentResultAsync(Order order, bool isSuccess)
+    {
+        if (isSuccess)
+        {
+            order.IsPaid = true;
+            if (order.Status == OrderStatus.PendingPayment)
+            {
+                order.Status = OrderStatus.PendingConfirmation;
+            }
+        }
+        else if (!order.IsPaid && order.Status != OrderStatus.Cancelled && order.Status != OrderStatus.Completed)
+        {
+            order.Status = OrderStatus.PendingPayment;
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private static bool IsOrderAmountValid(Order order, decimal amount)
+    {
+        return Math.Round(order.TotalAmount, 0) == Math.Round(amount, 0);
+    }
+
+    private IActionResult RedirectToOrderDetails(int orderId)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Details", "Orders", new { id = orderId });
+        }
+
+        return RedirectToAction(nameof(GuestOrderDetails), new { id = orderId });
+    }
+
+    private async Task<Order?> GetAccessibleOrderAsync(int id)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            return await dbContext.Orders
+                .Include(x => x.Items)
+                .ThenInclude(x => x.Product)
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        }
+
+        var trackedIds = GetGuestOrderIdsFromSession();
+        if (!trackedIds.Contains(id))
+        {
+            return null;
+        }
+
+        return await dbContext.Orders
+            .Include(x => x.Items)
+            .ThenInclude(x => x.Product)
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == null);
     }
 
     private async Task<CheckoutViewModel> BuildPrefillCheckoutModelAsync()
@@ -294,7 +481,7 @@ public class CheckoutController(
         }
 
         var session = HttpContext.Session;
-        session.SetString(GuestOrderSessionKey, System.Text.Json.JsonSerializer.Serialize(ids));
+        session.SetString(GuestOrderSessionKey, JsonSerializer.Serialize(ids));
     }
 
     private List<int> GetGuestOrderIdsFromSession()
@@ -306,6 +493,6 @@ public class CheckoutController(
             return new List<int>();
         }
 
-        return System.Text.Json.JsonSerializer.Deserialize<List<int>>(json) ?? new List<int>();
+        return JsonSerializer.Deserialize<List<int>>(json) ?? new List<int>();
     }
 }

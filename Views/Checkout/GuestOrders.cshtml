@@ -5,6 +5,7 @@
 
     string GetStatusLabel(OrderStatus status) => status switch
     {
+        OrderStatus.PendingPayment => "Chờ thanh toán",
         OrderStatus.PendingConfirmation => "Chờ xác nhận",
         OrderStatus.Preparing => "Đang làm",
         OrderStatus.Delivering => "Đang giao",
@@ -35,6 +36,7 @@
                         <div class="text-right">
                             <p class="font-semibold">@order.TotalAmount.ToString("N0")đ</p>
                             <p class="text-sm">@GetStatusLabel(order.Status)</p>
+                            <p class="text-xs text-slate-500">@(order.IsPaid ? "Đã thanh toán" : "Chưa thanh toán")</p>
                         </div>
                     </div>
                 </a>

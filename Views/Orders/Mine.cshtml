@@ -15,6 +15,7 @@
 
     string GetStatusLabel(OrderStatus status) => status switch
     {
+        OrderStatus.PendingPayment => "Chờ thanh toán",
         OrderStatus.PendingConfirmation => "Chờ xác nhận",
         OrderStatus.Preparing => "Đang làm",
         OrderStatus.Delivering => "Đang giao",
@@ -47,12 +48,17 @@
                             <div class="text-right">
                                 <p class="font-semibold">@order.TotalAmount.ToString("N0")đ</p>
                                 <p class="text-sm">@GetStatusLabel(order.Status)</p>
+                                <p class="text-xs text-slate-500">@(order.IsPaid ? "Đã thanh toán" : "Chưa thanh toán")</p>
                             </div>
                         </div>
                         <div class="mt-4 flex gap-2 flex-wrap">
                             <a asp-action="Details" asp-route-id="@order.Id" class="px-3 py-2 rounded-xl bg-slate-100">Chi tiết</a>
                             <a asp-action="Invoice" asp-route-id="@order.Id" class="px-3 py-2 rounded-xl bg-slate-100">PDF hóa đơn</a>
-                            @if (order.Status == OrderStatus.PendingConfirmation)
+                            @if (!order.IsPaid && order.Status != OrderStatus.Cancelled && order.Status != OrderStatus.Completed)
+                            {
+                                <a asp-controller="Checkout" asp-action="ContinuePayment" asp-route-id="@order.Id" class="px-3 py-2 rounded-xl bg-amber-500 text-white">Thanh toán lại</a>
+                            }
+                            @if (order.Status == OrderStatus.PendingConfirmation || order.Status == OrderStatus.PendingPayment)
                             {
                                 <form asp-action="Cancel" method="post">
                                     @Html.AntiForgeryToken()
@@ -95,6 +101,7 @@
                             <div class="text-right">
                                 <p class="font-semibold">@order.TotalAmount.ToString("N0")đ</p>
                                 <p class="text-sm">@GetStatusLabel(order.Status)</p>
+                                <p class="text-xs text-slate-500">@(order.IsPaid ? "Đã thanh toán" : "Đã đóng")</p>
                             </div>
                         </div>
                         <div class="mt-4 flex gap-2 flex-wrap">

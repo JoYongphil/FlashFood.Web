@@ -152,6 +152,7 @@ public class OrdersController(ApplicationDbContext dbContext) : Controller
 
     private static string GetStatusLabel(OrderStatus status) => status switch
     {
+        OrderStatus.PendingPayment => "Chờ thanh toán",
         OrderStatus.PendingConfirmation => "Chờ xác nhận",
         OrderStatus.Preparing => "Đang làm",
         OrderStatus.Delivering => "Đang giao",
