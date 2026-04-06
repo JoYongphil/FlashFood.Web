@@ -1,22 +1,23 @@
-﻿@page
+@page
 @model RegisterConfirmationModel
 @{
-    ViewData["Title"] = "Xác nhận đăng ký";
+    ViewData["Title"] = "Xac nhan dang ky";
 }
 
-<h1>@ViewData["Title"]</h1>
-@{
-    if (@Model.DisplayConfirmAccountLink)
-    {
-<p>
-    Hệ thống hiện chưa cấu hình dịch vụ gửi email thật. Xem <a href="https://aka.ms/aspaccountconf">hướng dẫn tại đây</a> để cấu hình email.
-    Liên kết xác nhận tạm thời: <a id="confirm-link" href="@Model.EmailConfirmationUrl">Nhấn vào đây để xác nhận tài khoản</a>
-</p>
-    }
-    else
-    {
-<p>
-        Vui lòng kiểm tra email để xác nhận tài khoản.
-</p>
-    }
-}
+<section class="max-w-2xl mx-auto px-4 py-16">
+    <div class="bg-white border rounded-2xl p-8 text-center">
+        <h1 class="text-3xl font-black text-slate-900">@ViewData["Title"]</h1>
+        <p class="mt-4 text-slate-600">
+            Chung toi da gui email xac thuc den <strong>@Model.Email</strong>.
+            Vui long mo hop thu va nhan vao lien ket xac nhan truoc khi dang nhap.
+        </p>
+        <p class="mt-3 text-sm text-slate-500">
+            Neu chua nhan duoc email, ban co the kiem tra muc Spam hoac gui lai email xac nhan.
+        </p>
+
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+            <a asp-page="./Login" class="px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold">Ve dang nhap</a>
+            <a asp-page="./ResendEmailConfirmation" class="px-5 py-3 rounded-xl bg-slate-100 text-slate-900 font-semibold">Gui lai email xac nhan</a>
+        </div>
+    </div>
+</section>

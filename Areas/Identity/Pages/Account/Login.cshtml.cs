@@ -61,12 +61,24 @@ public class LoginModel(
 
         if (ModelState.IsValid)
         {
+            var user = await userManager.FindByEmailAsync(Input.Email);
+            if (user is null)
+            {
+                ModelState.AddModelError(string.Empty, "Thong tin dang nhap khong hop le.");
+                return Page();
+            }
+
+            if (!await userManager.IsEmailConfirmedAsync(user))
+            {
+                ModelState.AddModelError(string.Empty, "Tai khoan chua xac thuc email. Vui long kiem tra hop thu hoac gui lai email xac nhan.");
+                return Page();
+            }
+
             var result = await signInManager.PasswordSignInAsync(Input.Email, Input.Password, isPersistent: Input.RememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
                 logger.LogInformation("User logged in.");
 
-                var user = await userManager.FindByEmailAsync(Input.Email);
                 if (user is not null && await userManager.IsInRoleAsync(user, "Admin"))
                 {
                     return LocalRedirect("/Admin/Dashboard");
@@ -86,7 +98,13 @@ public class LoginModel(
                 return RedirectToPage("./Lockout");
             }
 
-            ModelState.AddModelError(string.Empty, "Thông tin đăng nhập không hợp lệ.");
+            if (result.IsNotAllowed)
+            {
+                ModelState.AddModelError(string.Empty, "Tai khoan chua du dieu kien dang nhap. Hay xac thuc email truoc.");
+                return Page();
+            }
+
+            ModelState.AddModelError(string.Empty, "Thong tin dang nhap khong hop le.");
         }
 
         return Page();

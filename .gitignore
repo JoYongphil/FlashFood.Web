@@ -361,3 +361,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local dev secrets, caches, and generated outputs
+.dotnet/
+appdata/
+build-verify/
+build-verify FlashFood.Web.csproj/
+*.bak
+*.bacpac
+*.db

@@ -30,7 +30,7 @@ public class ConfirmEmailModel(UserManager<AppUser> userManager) : PageModel
 
         code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
         var result = await userManager.ConfirmEmailAsync(user, code);
-        StatusMessage = result.Succeeded ? "Xác nhận email thành công." : "Xác nhận email thất bại.";
+        StatusMessage = result.Succeeded ? "Xac nhan email thanh cong. Ban da co the dang nhap." : "Xac nhan email that bai.";
         return Page();
     }
 }

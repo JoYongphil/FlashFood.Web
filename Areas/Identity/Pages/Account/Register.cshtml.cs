@@ -89,13 +89,7 @@ public class RegisterModel(
                     "Xác nhận email",
                     $"Vui lòng xác nhận tài khoản bằng cách <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>nhấn vào đây</a>.");
 
-                if (userManager.Options.SignIn.RequireConfirmedAccount)
-                {
-                    return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl });
-                }
-
-                await signInManager.SignInAsync(user, isPersistent: false);
-                return LocalRedirect(returnUrl);
+                return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl });
             }
 
             foreach (var error in result.Errors)
